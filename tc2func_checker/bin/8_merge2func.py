@@ -11,6 +11,10 @@ root_dir = main_dir.parent
 
 def merge2func():
     pp_csv = main_dir / 'output/pp_data-v1.csv'
+
+    func_cov_dict = {}
+
+    unwanted = ['jsontestrunner', 'test_lib_json', 'CMakeFils']
     
     with open(pp_csv, 'r') as f:
         reader = csv.reader(f)
@@ -24,14 +28,14 @@ def merge2func():
             function_name = key_info[1]
             line_number = key_info[2]
 
-            print(key)
-            
-            cnt = 0
-            for tc_id in row[1:]:
-                cnt += 1
-                print('{} {}'.format(cnt, tc_id))
+            unwanted_dir = target_file.split('/')[1]
 
-            break
+            func_key = '{}#{}'.format(target_file, function_name)
+
+            if func_key not in func_cov_dict.keys():
+                func_cov_dict[func_key] = []
+        
+        print(len(func_cov_dict.keys()))
 
 
 if __name__ == '__main__':

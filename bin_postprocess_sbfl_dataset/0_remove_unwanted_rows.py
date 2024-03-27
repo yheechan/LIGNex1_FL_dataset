@@ -28,7 +28,7 @@ def get_buggy_line(spect_csv):
     return None
 
 def remove_and_rewrite_csv(spect_csv):
-    unwanted = ['jsontestrunner', 'test_lib_json', 'CmakeFiles']
+    unwanted = ['jsontestrunner', 'test_lib_json', 'CMakeFiles']
     checked = ['jsontestrunner', 'test_lib_json', 'json', 'lib_json', 'CMakeFiles']
 
     spect_df = pd.read_csv(spect_csv)
