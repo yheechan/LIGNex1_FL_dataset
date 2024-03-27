@@ -37,6 +37,6 @@ When executing ``./extractor <target source code file>``, line-to-function infor
 ```
 <function class name>##<function name>##<start line number>##<end line number>##<info>##<file name>
 ```
-* When a class is not part of a class, ``function class name>`` is written as ``None``.
+* When a class is not part of a class, ``<function class name>`` is written as ``None``.
 
 
