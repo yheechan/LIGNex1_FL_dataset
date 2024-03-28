@@ -140,7 +140,7 @@ def get_rank_at_method_level(spect_csv, buggy_line_key, formula):
     }
     return data
 
-def rank_sbfl_dataset(sbfl_dataset):
+def rank_sbfl_dataset(sbfl_dataset, wanted_name):
     SBFL = [
         'Binary', 'GP13', 'Jaccard', 'Naish1',
         'Naish2', 'Ochiai', 'Russel+Rao', 'Wong1'
@@ -188,7 +188,7 @@ def rank_sbfl_dataset(sbfl_dataset):
         # if cnt == 3:
         #     break
     
-    file_name = 'sbfl_rank_{}.csv'.format(sbfl_dataset.name)
+    file_name = 'sbfl_rank_{}.csv'.format(wanted_name)
     with open(file_name, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=result_list[0].keys())
         writer.writeheader()
@@ -201,7 +201,8 @@ def rank_sbfl_dataset(sbfl_dataset):
 if __name__ == "__main__":
     # this is the name of target sbfl dataset (ex. overall_24_02_20-v2)
     sbfl_dataset_dir_name = sys.argv[1]
+    wanted_name = sys.argv[2]
     sbfl_dataset_dir = root_dir / 'sbfl_datasets' / sbfl_dataset_dir_name
     assert sbfl_dataset_dir.exists(), f"sbfl dataset {sbfl_dataset_dir} does not exist"
 
-    rank_sbfl_dataset(sbfl_dataset_dir)
+    rank_sbfl_dataset(sbfl_dataset_dir, wanted_name)

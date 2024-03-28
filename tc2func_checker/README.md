@@ -24,7 +24,7 @@ cd bin/
 ```
 
 ### 3. extract line-to-function information
-  * line2function data is save in ``output/line2function_data/line2function.json`` file
+  * line2function data is saved in ``output/line2function_data/line2function.json`` file
 ```
 ./3_extract_line2function.py jsoncpp_template
 ```
@@ -49,8 +49,19 @@ cd bin/
 ```
 
 ### 7. post-process the raw coverage data (json formatted) to a csv format (line2tc)
-  * the postprocessed coverage data is save in ``output/pp_data.csv`` file
+  * the postprocessed coverage data is saved in ``output/pp_data.csv`` file
   * total line number: 6,675
+```
+7_postprocess_cov
+```
+
+### 8. merge lines to its assigned functions.
+  * during merge TC that execute the line is merge to its assigned function
+  * number of functions: 363
+  * merged data is saved in ``output/pp_data-v2.csv`` file
+```
+./8_mergefunc.py
+```
 
 
-built on March 27, 2024
+last updated on March 28, 2024
