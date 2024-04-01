@@ -51,7 +51,7 @@ def build_jsoncpp(project_dir):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: 1_make_template.py <template_name>')
+        print('Usage: 2_build_jsoncpp.py <template_name>')
         sys.exit(1)
 
     template_name = sys.argv[1]
