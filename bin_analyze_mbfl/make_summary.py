@@ -390,6 +390,11 @@ def make_summary_csv(mbfl_features_dataset_dir_name, bug_isd):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python3 make_summary.py <mbfl_features_dataset_dir_name>")
+        print("ex) ./make_summary.py mbfl_dataset-240331")
+        sys.exit(1)
+        
     mbfl_features_dataset_dir_name = sys.argv[1]
     bug_ids = get_bugs(mbfl_features_dataset_dir_name)
     make_summary_csv(mbfl_features_dataset_dir_name, bug_ids)
