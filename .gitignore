@@ -1,5 +1,8 @@
 sbfl_datasets/
 mbfl_datasets/
+
 bug_versions_codes/
+prerequisite_dataset/
+
 *.csv
 *template*
