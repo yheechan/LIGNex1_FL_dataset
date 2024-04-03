@@ -4,7 +4,7 @@ This bin directory is to contain python scripts to run commands on distributed m
 
 ## Commands
 
-### ``make_summary.py``
+### ``run_cmd.py``
 * operation: executes commands in CLI of distributed machines.
 * purpose: to simplify executing commands to handle moving, deleting, or backup files within the distributed machines.
 ```
