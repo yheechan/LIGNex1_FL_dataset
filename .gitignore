@@ -6,5 +6,6 @@ prerequisite_dataset/
 
 *.csv
 *template*
+original_jsoncpp/
 
 MUSICUP/

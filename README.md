@@ -19,10 +19,10 @@
 * ``mbfl_datasets``: contains MBFL dataset results from MBFL dataset generating tool.
 * ``sbfl_datasets``: contains SBFL dataset results from SBFL dataset generating tool.
 
-### prerequisites: data needed for generating certain dataset (ignored in git repository)
+### prerequisites: data needed for generating certain dataset
 * ``original_code_files_on_jsoncpp``: contains code files for original (bug free) jsoncpp source code.
-* ``bug_versions_code``: code containing buggy source code file of bug versions (differentiated by dataset - pair with ``prerequisite_data``)
-* ``prerequisite_data``: dataset that contains prerequisite data such as **lines executed by failing TC** or **test case info (CCTCs)** of bug versions (differentiated by dataset - pair with ``bug_versions_code``)
+* ``bug_versions_code``: code containing buggy source code file of bug versions (differentiated by dataset - pair with ``prerequisite_data``) (ignored in git repository)
+* ``prerequisite_data``: dataset that contains prerequisite data such as **lines executed by failing TC** or **test case info (CCTCs)** of bug versions (differentiated by dataset - pair with ``bug_versions_code``) (ignored in git repository)
 
 
-last update on April 3, 2024
+last update on April 4, 2024
