@@ -18,5 +18,8 @@ This bin directory is to contain python scripts to clone jsoncpp from git reposi
 ### ``4_get_html.py <template name>``
 * operation: generates the html for visualizing coverage
 
+### ``5_delete_jsoncpp.py <template name>``
+* operation: delete jsoncpp project repository
 
-last updated on April 2, 2024
+
+last updated on April 4, 2024

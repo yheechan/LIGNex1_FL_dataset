@@ -45,13 +45,17 @@ def change_files(template_name):
     og_dir = main_dir / 'original_code_files_on_jsoncpp'
 
     cp_dict = {
-        'value_file' : [
-            project_path / 'src/lib_json/json_value.cpp',
-            og_dir / 'json_value.cpp'
-        ],
         'reader_file' : [
             project_path / 'src/lib_json/json_reader.cpp',
-            og_dir / 'json_reader.cpp'
+            og_dir / 'original_version/json_reader.cpp'
+        ],
+        'value_file' : [
+            project_path / 'src/lib_json/json_value.cpp',
+            og_dir / 'original_version/json_value.cpp'
+        ],
+        'writer_file' : [
+            project_path / 'src/lib_json/json_writer.cpp',
+            og_dir / 'original_version/json_writer.cpp'
         ],
         'test_main_file' : [
             project_path / 'src/test_lib_json/main.cpp',
