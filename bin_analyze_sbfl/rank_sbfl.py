@@ -189,7 +189,11 @@ def rank_sbfl_dataset(sbfl_dataset, wanted_name):
         #     break
     
     file_name = 'sbfl_rank_{}.csv'.format(wanted_name)
-    with open(file_name, 'w', newline='') as f:
+    output_dir = bin_dir / 'output'
+    if not output_dir.exists():
+        output_dir.mkdir()
+    file_path = output_dir / file_name
+    with open(file_path, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=result_list[0].keys())
         writer.writeheader()
         writer.writerows(result_list)
