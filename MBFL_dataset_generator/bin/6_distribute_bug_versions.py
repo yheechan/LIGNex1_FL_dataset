@@ -44,6 +44,8 @@ def get_target_file(target_prereq_dir, bug_id):
 def start_program(bash_filename, target_prereq_dir, experiment_name):
     machinecore2bug_dict = get_machinecore2bug_dict()
 
+    bug2file_fp = open(main_dir / 'bug2file.txt', 'w')
+
     bash_file = bin_dir / bash_filename
     bash_file_fp = open(bash_file, 'w')
     bash_file_fp.write('date\n')
@@ -55,12 +57,16 @@ def start_program(bash_filename, target_prereq_dir, experiment_name):
             bug_id = machinecore2bug_dict[machine][core]
             target_file = get_target_file(target_prereq_dir, bug_id)
 
+            bug2file_fp.write(f"{bug_id}-{target_file.name}\n")
+
             bash_file_fp.write(f"scp -r {target_file} {machine}:/home/yangheechan/{experiment_name}/{core}/jsoncpp_template/src/lib_json/{target_file.name} &\n")
 
             limit_cnt += 1
             if limit_cnt % 5 == 0:
                 bash_file_fp.write("sleep 1s\n")
                 bash_file_fp.write("wait\n")
+    
+    bug2file_fp.close()
     
     
     # copy target jsoncpp buggy source code file to the buggy_version_code_files

@@ -45,7 +45,7 @@ def start_program(bash_filename, experiment_name, mutation_size, l_cnt):
             limit_cnt += 1
             if limit_cnt % 5 == 0:
                 bash_file_fp.write("sleep 1s\n")
-                bash_file_fp.write("wait\n")
+                # bash_file_fp.write("wait\n")
     
     
     bash_file_fp.write("echo ssh done, waiting...\n")

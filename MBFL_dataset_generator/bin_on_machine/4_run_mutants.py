@@ -118,26 +118,12 @@ def check_jsoncpp_tester(build_dir):
     jsoncpp_tester = build_dir / 'src/test_lib_json/jsoncpp_test'
     assert jsoncpp_tester.exists(), f'{jsoncpp_tester} does not exist'
     
-    cmd = [jsoncpp_tester, '--list-tests']
-    process = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf-8')
-
-    tc_dict = {}
-    tc_cnt = 1
-    while True:
-        line = process.stdout.readline()
-        if line == '' and process.poll() is not None:
-            break
-        line = line.strip()
-        if line == '':
-            continue
-        
-        tc_dict['TC{}'.format(tc_cnt)] = line
-        tc_cnt += 1
-    
-    if len(tc_dict) != 127:
+    cmd = ['timeout', '1s', jsoncpp_tester, '--list-tests']
+    res = sp.call(cmd, stdout=sp.PIPE, stderr=sp.STDOUT, encoding='utf-8')
+    if res != 0:
         return -1
-    
-    return 0
+    else:
+        return 0
 
 def build_mutated_jsoncpp(core_dir, mutant_dir):
     build_res = 'build-success'
