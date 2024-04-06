@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# VALIDATE 01: CHECK IF ALL BUG DIRECTORIES HAVE MBFL_FEATURES.CSV (on mbfl_dataset_b4_gather)
+
 import sys
 from pathlib import Path
 import subprocess as sp

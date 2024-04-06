@@ -5,9 +5,12 @@ This bin directory is to contain python scripts to check the validity of MBFL fe
 ## Commands
 * input: MBFL feature dataset directory name (generated from MBFL dataset generating tool)
 
-### ``validate_01.py <mbfl dataset name>``
-* validate that all bugs retrieved from distributed machines contain mbfl feature dataset csv file.
+### ``01_validate.py <mbfl dataset name>``
+* operation: validate that all bugs retrieved from distributed machines contain mbfl feature dataset csv file.
+
+### ``02_validate.py <mbfl dataset name>``
+* operation: validate that the mutation token exists in the buggy code file
 
 
 
-last updated on April 5, 2024
+last updated on April 6, 2024
