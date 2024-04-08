@@ -277,7 +277,7 @@ def get_rank_at_method_level(mbfl_dataset_dir, bug_id, buggy_line_key, formula):
     # THE RANK IS BASED ON FORMULA VALUE
     # IF THE RANK IS A TIE, THE RANK IS THE UPPER BOUND OF THE TIERS
     mbfl_features_df['rank'] = mbfl_features_df[formula].rank(method='max', ascending=False).astype(int)
-    # sbfl_features_df.to_csv('ranked.csv', index=False)
+    # mbfl_features_df.to_csv('ranked.csv', index=False)
 
 
     # 6. GET THE RANK OF THE BUGGY LINE
