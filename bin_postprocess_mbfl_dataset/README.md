@@ -36,6 +36,14 @@ $ ./rank_mbfl.py mbfl_dataset-240405-v2
 # bin_valid_check_mbfl
 $ ./01_validate.py mbfl_dataset-240405-v2
 $ ./02_validate.py mbfl_dataset-240405-v2
+
+# bin_postprocess_mbfl_dataset
+# copy mbfl_dataset-240405-v2 to mbfl_dataset-240405-v3
+# for excluding lines (rows) from unnecessary source code files (i.e., test code, CMakeFiles)
+$ ./3_remove_unwanted_rows.py mbfl_dataset-240405-v3
+
+# bin_analyze_mbfl
+$ ./rank_mbfl.py mbfl_dataset-240405-v3
 ```
 
 
