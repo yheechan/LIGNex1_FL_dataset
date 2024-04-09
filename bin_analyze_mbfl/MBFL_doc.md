@@ -51,7 +51,7 @@ mbfl_dataset/
 * met_1: $ \max_{m \in \text{mut}_\text{killed}(s)} (kill(m)) $
 * met_2: $ \max_{m \in \text{mut}_\text{killed}(s)} \frac{1}{\sqrt{kill(m)}} $
 * met_3: $ \max_{m \in \text{mut}_\text{killed}(s)} \frac{1}{\sqrt{kill(m) + notkill(m)}} $
-* met_4: $ \max_{m \in \text{mut}_\text{killed}(s)} \frac{1}{\sqrt{{kill(m)}({kill(m)}+{notkill(m)})}} $
+* met_4: $ \max_{m \in \text{mut}_\text{killed}(s)} \frac{kill(m)}{\sqrt{{kill(m)}({kill(m)}+{notkill(m)})}} $
 
     where:
     * $ \text{mut}_\text{killed}(s) $ is a set of killed mutants generated at statment $s$

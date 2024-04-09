@@ -121,23 +121,6 @@ def get_mutants_info(per_mutant_dir, line2mutant_dict, target_file, target_linen
     return mutants_dict
 
 
-def save_perline_f2p_dict(perline_f2p_dict, bug_version):
-    output_dir = bin_dir / 'output'
-    if not output_dir.exists():
-        output_dir.mkdir()
-    
-    csv_filename = f"{bug_version}.perline_f2p.csv"
-    csv_path = output_dir / csv_filename
-
-    with open(csv_path, 'w') as f:
-        f.write("target_file,line_no,# of mutants,built_failed,total_p2f,total_f2p,total_mutants_with_f2p\n")
-        for target_file in perline_f2p_dict:
-            for line_no in perline_f2p_dict[target_file]:
-                f.write(f"{target_file},{line_no},{perline_f2p_dict[target_file][line_no]['# of mutants']},{perline_f2p_dict[target_file][line_no]['build_failed']},{perline_f2p_dict[target_file][line_no]['total_p2f']},{perline_f2p_dict[target_file][line_no]['total_f2p']},{perline_f2p_dict[target_file][line_no]['total_mutants_with_f2p']}\n")
-    
-    print(f"Saved to {csv_path}")
-
-
 def start_program(mbfl_dir, bug_version, target_file, target_lineno):
     # get mutants_data_dir of bug version
     mutants_data_dir = mbfl_dir / 'mutants_data_per_bug_version' / bug_version
@@ -155,15 +138,24 @@ def start_program(mbfl_dir, bug_version, target_file, target_lineno):
     # print mutants_dict
     cnt = 0
     tot_f2p = 0
+    tot_p2f = 0
+    tot_utilized_mutants = 0
     print(f"target_file: {target_file}, target_lineno: {target_lineno}")
     for mutant_id in mutants_dict:
         print(f"mutant_id: {mutant_id}")
         for key in mutants_dict[mutant_id]:
             print(f"\t{key}: {mutants_dict[mutant_id][key]}")
+
             if key == 'f2p' and mutants_dict[mutant_id][key] != 'N/A':
                 tot_f2p += mutants_dict[mutant_id][key]
+            if key == 'p2f' and mutants_dict[mutant_id][key] != 'N/A':
+                tot_p2f += mutants_dict[mutant_id][key]
+            if key == 'build status' and mutants_dict[mutant_id][key] == 'success':
+                tot_utilized_mutants += 1
         cnt += 1
     print(f"total f2p: {tot_f2p}")
+    print(f"total p2f: {tot_p2f}")
+    print(f"total utilized mutants: {tot_utilized_mutants}")
     print(f"total mutants: {cnt}")
     
 

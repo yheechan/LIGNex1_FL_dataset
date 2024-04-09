@@ -10,8 +10,8 @@ mbfl_datasets_dir = root_dir / "mbfl_datasets"
 assert mbfl_datasets_dir.exists(), f"{mbfl_datasets_dir} does not exist"
 
 
-def get_line2mutant_dict(mutant_info_dir):
-    mutants_db_csv = mutant_info_dir / 'selected_mutants/mutants_db.csv'
+def get_line2mutant_dict(mutants_data_dir):
+    mutants_db_csv = mutants_data_dir / 'selected_mutants/mutants_db.csv'
     assert mutants_db_csv.exists(), f"{mutants_db_csv} does not exist"
 
     line2mutant_dict = {}
@@ -144,15 +144,15 @@ def save_perline_f2p_dict(perline_f2p_dict, bug_version):
 
 
 def start_program(mbfl_dir, bug_version):
-    # get mutant_info_dir of bug version
-    mutant_info_dir = mbfl_dir / 'mutant_info_per_bug_version' / bug_version
-    assert mutant_info_dir.exists(), f"{mutant_info_dir} does not exist"
+    # get mutants_data_dir of bug version
+    mutants_data_dir = mbfl_dir / 'mutants_data_per_bug_version' / bug_version
+    assert mutants_data_dir.exists(), f"{mutants_data_dir} does not exist"
 
-    per_mutant_dir = mbfl_dir / 'mutant_info_per_bug_version' / bug_version / 'per_mutant_data'
+    per_mutant_dir = mbfl_dir / 'mutants_data_per_bug_version' / bug_version / 'per_mutant_data'
     assert per_mutant_dir.exists(), f"{per_mutant_dir} does not exist"
 
     # get line2mutant dict
-    line2mutant_dict = get_line2mutant_dict(mutant_info_dir)
+    line2mutant_dict = get_line2mutant_dict(mutants_data_dir)
 
     # get perline_f2p_dict
     perline_f2p_dict = get_perline_f2p_dict(per_mutant_dir, line2mutant_dict)
