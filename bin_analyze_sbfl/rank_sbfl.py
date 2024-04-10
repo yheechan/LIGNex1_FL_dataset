@@ -182,9 +182,10 @@ def rank_sbfl_dataset(sbfl_dataset, wanted_name):
         
 
         write_data = {
-            'bug_version': bug_version,
-            'bug_target_file': bug_target_file,
-            'bug_function_name': bug_function_name,
+            'bug_id': bug_version,
+            # 'bug_target_file': bug_target_file,
+            # 'bug_function_name': bug_function_name,
+            'key': buggy_line_key
         }
         for formula in SBFL:
             for key, value in ranks[formula].items():
