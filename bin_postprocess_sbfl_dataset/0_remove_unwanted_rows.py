@@ -14,14 +14,14 @@ root_dir = bin_dir.parent
 
 # Funciton to get the buggy line from spectrum csv
 # (because buggy line information was not saved before when making SBFL data)
-def get_buggy_line(spect_csv):
+def get_buggy_line(spect_csv, bug_stat_col):
     assert spect_csv.exists(), f"{spect_csv} does not exist"
     with open(spect_csv, 'r') as f:
         reader = csv.reader(f)
         header = next(reader)
         for row in reader:
             # bug_stat = int(row[13])
-            bug_stat = int(row[5])
+            bug_stat = int(row[bug_stat_col])
             if bug_stat == 1:
                 # (ex) bug1 # src/lib_json/json_writer.cpp $ valuetoString() # 95
                 buggy_line_key = row[0]
@@ -54,19 +54,23 @@ def custome_sort(spect_csv):
     bug_name = spect_csv.name.split('.')[0]
     return int(bug_name[3:])
 
-def remove_unwanted_rows(sbfl_dataset_dir):
+def remove_unwanted_rows(sbfl_dataset_dir, sbfl_feature_target):
 
     # spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug-all'
-    spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug'
+    spectrum_dir = sbfl_dataset_dir / sbfl_feature_target
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
     bug_dirs = sorted(spectrum_dir.iterdir(), key=custome_sort)
+
+    bug_stat_col = 5
+    if 'all' in sbfl_feature_target:
+        bug_stat_col = 13
 
     cnt = 0
     for spect_csv in bug_dirs:
         bug_id = spect_csv.name.split('.')[0]
         
-        buggy_line_key = get_buggy_line(spect_csv)
+        buggy_line_key = get_buggy_line(spect_csv, bug_stat_col)
         key_info = buggy_line_key.split('#')
         # bug_version = key_info[0].strip()
         bug_target_file = key_info[0].strip()
@@ -87,4 +91,6 @@ if __name__ == "__main__":
     sbfl_dataset_dir = root_dir / 'sbfl_datasets' / sbfl_dataset_dir_name
     assert sbfl_dataset_dir.exists(), f"sbfl dataset {sbfl_dataset_dir} does not exist"
 
-    remove_unwanted_rows(sbfl_dataset_dir)
+    sbfl_feature_target = sys.argv[2]
+
+    remove_unwanted_rows(sbfl_dataset_dir, sbfl_feature_target)
