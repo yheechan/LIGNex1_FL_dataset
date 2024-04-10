@@ -18,6 +18,31 @@ metrix_py = '\"/home/yangheechan/metrixplusplus/metrix++.py\"'
 # python "/home/yangheechan/metrixplusplus/metrix++.py" view -- json_valueiterator.cpp
 # python "/home/yangheechan/metrixplusplus/metrix++.py" export --db-file=metrixpp.db > tmp.csv
 
+features_list = [
+    '--std.general.size',
+    '--std.code.length.total',
+    '--std.code.filelines.total',
+    '--std.code.lines.total',
+    '--std.code.filelines.code',
+    '--std.code.lines.code',
+    '--std.code.filelines.preprocessor',
+    '--std.code.lines.preprocessor',
+    '--std.code.filelines.comments',
+    '--std.code.lines.comments',
+    '--std.code.ratio.comments',
+    '--std.code.complexity.cyclomatic',
+    '--std.code.complexity.cyclomatic_switch_case_once',
+    '--std.code.complexity.maxindent',
+    '--std.code.magic.numbers',
+    '--std.code.todo.comments',
+    '--std.general.proctime',
+    '--std.suppress',
+    '--std.general.procerrors',
+    '--std.code.maintindex.simple'
+]
+
+metrix_features = ' '.join(features_list)
+
 def change_inl2cpp(target_file):
     filename = target_file.name.split('/')[-1].split('.')[0]
     new_filename = filename+'.cpp'
@@ -69,7 +94,7 @@ def get_static_features(dataset_dir, target_file):
     file_path = target_file.parent
     
     # measure static feature data with metrix
-    sp.run(f"python {metrix_py} collect --std.code.lines.code -- {target_file.name}", shell=True, cwd=file_path)
+    sp.run(f"python {metrix_py} collect {metrix_features} -- {target_file.name}", shell=True, cwd=file_path)
 
     db_file = bin_dir / 'metrixpp.db'
     csv_filename = f"{target_filename}.static_features.csv"
