@@ -21,6 +21,11 @@
 * ``MBFL_dataset_generator``: repository of the project that generates MBFL feature dataset based on:
     * ``bug_versions_code``
     * ``prerequisite_data``
+* ``SBFL_dataset_generator``: repository of the project that generates SBFL feature dataset based on:
+    * ``prerequisite_data``
+* ``STATIC_dataset_generator``: repository of the project that generates STATIC feature dataset based on:
+    * ``jsoncpp project repo``
+    * jsoncpp project repo can be initiated from ``bin_jsoncpp_clone``
 * ``tc2func_checker``: functions to measure the number of TCs executing a target function.
 
 
@@ -29,6 +34,7 @@
 * ``mbfl_dataset_b4_gather``: contains MBFL dataset retrieved from distributed machines
 * ``mbfl_datasets``: contains MBFL dataset results from MBFL dataset generating tool (Re-organize retrieved dataset from distributed machines).
 * ``sbfl_datasets``: contains SBFL dataset results from SBFL dataset generating tool.
+* ``static_datasets``: contains STATIC dataset results from STATIC dataset generating tool.
 
 
 
@@ -40,4 +46,6 @@
 
 
 
-last update on April 6, 2024
+last update on April 10, 2024
+
+
