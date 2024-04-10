@@ -20,7 +20,8 @@ def get_buggy_line(spect_csv):
         reader = csv.reader(f)
         header = next(reader)
         for row in reader:
-            bug_stat = int(row[13])
+            # bug_stat = int(row[13])
+            bug_stat = int(row[5])
             if bug_stat == 1:
                 # (ex) bug1 # src/lib_json/json_writer.cpp $ valuetoString() # 95
                 buggy_line_key = row[0]
@@ -55,7 +56,8 @@ def custome_sort(spect_csv):
 
 def remove_unwanted_rows(sbfl_dataset_dir):
 
-    spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug-all'
+    # spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug-all'
+    spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug'
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
     bug_dirs = sorted(spectrum_dir.iterdir(), key=custome_sort)
