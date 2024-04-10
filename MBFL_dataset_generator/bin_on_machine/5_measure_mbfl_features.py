@@ -149,20 +149,25 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
                 # notkilled(m) = p2p + f2f
                 killed = p2f + f2p
                 notkilled = p2p + f2f
-                met_1 = killed
-                if killed == 0:
-                    met_2 = 0
-                else:
-                    met_2 = 1 / math.sqrt(killed)
-                met_3 = 1 / math.sqrt(killed + notkilled)
-                if killed == 0:
-                    met_4 = 0
-                else:
-                    met_4 = 1 / math.sqrt(killed * (killed + notkilled))
-                line2met_1.append(met_1)
-                line2met_2.append(met_2)
-                line2met_3.append(met_3)
-                line2met_4.append(met_4)
+
+                # only when mutant was killed
+                if killed > 0:
+                    met_1 = killed
+                    
+                    if killed == 0:
+                        met_2 = 0
+                    else:
+                        met_2 = 1 / math.sqrt(killed)
+                    met_3 = 1 / math.sqrt(killed + notkilled)
+                    if killed == 0:
+                        met_4 = 0
+                    else:
+                        met_4 = killed / math.sqrt(killed * (killed + notkilled))
+                
+                    line2met_1.append(met_1)
+                    line2met_2.append(met_2)
+                    line2met_3.append(met_3)
+                    line2met_4.append(met_4)
 
                 # measuring muse
                 muse_2 += f2p
@@ -170,10 +175,17 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
             # print('# of build failed mutants: ', build_failed)
             if build_failed == len(mutant_dict[target_file][line_key]):
                 continue
-            met_1 = max(line2met_1)
-            met_2 = max(line2met_2)
-            met_3 = max(line2met_3)
-            met_4 = max(line2met_4)
+
+            if len(line2met_1) == 0:
+                met_1 = 0
+                met_2 = 0
+                met_3 = 0
+                met_4 = 0
+            else:
+                met_1 = max(line2met_1)
+                met_2 = max(line2met_2)
+                met_3 = max(line2met_3)
+                met_4 = max(line2met_4)
 
             muse_1 = 1 / (line2mutant_cnt + 1)
             muse_4 = (1 / ((line2mutant_cnt + 1) * (total_f2p + 1))) * muse_2
@@ -261,7 +273,6 @@ def get_buggy_line(core_dir):
 if __name__ == "__main__":
     core_id = sys.argv[1]
     core_dir = main_dir / core_id
-    jsoncpp_dir = core_dir / 'jsoncpp_template'
 
     lines_list = get_lines_list(core_dir)
     mutant_dict = get_mutant_dict(core_dir)
