@@ -27,21 +27,21 @@ def get_buggy_line(spect_csv):
 def get_rank_at_method_level(spect_csv, buggy_line_key, formula):
     assert spect_csv.exists(), f"{spect_csv} does not exist"
     key_info = buggy_line_key.split('#')
-    bug_version = key_info[0].strip()
-    bug_target_file = key_info[1].strip()
-    bug_function_name = key_info[2].strip()
-    bug_line_num = int(key_info[3].strip())
+    # bug_version = key_info[0].strip()
+    bug_target_file = key_info[0].strip()
+    bug_function_name = key_info[1].strip()
+    bug_line_num = int(key_info[2].strip())
 
     sbfl_features_df = pd.read_csv(spect_csv)
 
     # 1. SET ALL BUGGY LINE OF BUGGY FUNCTION TO BUG1
     for index, row in sbfl_features_df.iterrows():
-        key = row['lineNo']
+        key = row['key']
         curr_key_info = key.split('#')
-        curr_version = curr_key_info[0].strip()
-        curr_target_file = curr_key_info[1].strip()
-        curr_function_name = curr_key_info[2].strip()
-        curr_line_num = int(curr_key_info[3].strip())
+        # curr_version = curr_key_info[0].strip()
+        curr_target_file = curr_key_info[0].strip()
+        curr_function_name = curr_key_info[1].strip()
+        curr_line_num = int(curr_key_info[2].strip())
 
         sbfl_features_df.at[index, 'target_file'] = curr_target_file
         sbfl_features_df.at[index, 'function_name'] = curr_function_name
@@ -55,7 +55,7 @@ def get_rank_at_method_level(spect_csv, buggy_line_key, formula):
             sbfl_features_df.at[index, 'bug'] = 0
 
     # 2. DROP THE LINENO COLUMN
-    sbfl_features_df.drop(columns=['lineNo'])
+    sbfl_features_df.drop(columns=['key'])
     sbfl_features_df = sbfl_features_df[[
         'target_file', 'function_name', 'line_num',
         'ep', 'ef', 'np', 'nf',
@@ -140,6 +140,10 @@ def get_rank_at_method_level(spect_csv, buggy_line_key, formula):
     }
     return data
 
+def custome_sort(bug_file):
+    bug_name = bug_file.name.split('.')[0]
+    return int(bug_name[3:])
+
 def rank_sbfl_dataset(sbfl_dataset, wanted_name):
     SBFL = [
         'Binary', 'GP13', 'Jaccard', 'Naish1',
@@ -147,20 +151,26 @@ def rank_sbfl_dataset(sbfl_dataset, wanted_name):
     ]
     result_list = []
 
-    spectrum_dir = sbfl_dataset / 'spectrum_feature_data_excluding_coincidentally_correct_tc_per_bug'
+    # spectrum_dir = sbfl_dataset / 'spectrum_feature_data_excluding_coincidentally_correct_tc_per_bug'
+    spectrum_dir = sbfl_dataset / 'sbfl_features_per_bug-all'
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
+    bug_files = sorted(spectrum_dir.iterdir(), key=custome_sort)
+
     cnt = 0
-    for spect_csv in spectrum_dir.iterdir():
+    for spect_csv in bug_files:
+        bug_version = spect_csv.name.split('.')[0]
+
         buggy_line_key = get_buggy_line(spect_csv)
         assert buggy_line_key is not None, f"buggy line not found in {spect_csv}"
+        print(buggy_line_key)
 
         key_info = buggy_line_key.split('#')
-        bug_version = key_info[0].strip()
-        bug_target_file = key_info[1].strip().split('/')[-1]
+        # bug_version = key_info[0].strip()
+        bug_target_file = key_info[0].strip().split('/')[-1]
         assert bug_target_file in ['json_reader.cpp', 'json_value.cpp'], f"bug_target_file is not json_reader.cpp or json_writer.cpp"
-        bug_function_name = key_info[2].strip()
-        bug_line_num = int(key_info[3].strip())
+        bug_function_name = key_info[1].strip()
+        bug_line_num = int(key_info[2].strip())
 
         cnt += 1
         print(cnt, buggy_line_key)
@@ -188,10 +198,11 @@ def rank_sbfl_dataset(sbfl_dataset, wanted_name):
         # if cnt == 3:
         #     break
     
-    file_name = 'sbfl_rank_{}.csv'.format(wanted_name)
     output_dir = bin_dir / 'output'
     if not output_dir.exists():
         output_dir.mkdir()
+
+    file_name = 'sbfl_rank_{}.csv'.format(wanted_name)
     file_path = output_dir / file_name
     with open(file_path, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=result_list[0].keys())

@@ -34,12 +34,12 @@ def remove_and_rewrite_csv(spect_csv):
     spect_df = pd.read_csv(spect_csv)
 
     for index, row in spect_df.iterrows():
-        key = row['lineNo']
+        key = row['key']
         curr_key_info = key.split('#')
-        curr_version = curr_key_info[0].strip()
-        curr_target_file = curr_key_info[1].strip()
-        curr_function_name = curr_key_info[2].strip()
-        curr_line_num = int(curr_key_info[3].strip())
+        # curr_version = curr_key_info[0].strip()
+        curr_target_file = curr_key_info[0].strip()
+        curr_function_name = curr_key_info[1].strip()
+        curr_line_num = int(curr_key_info[2].strip())
 
         target_dir = curr_target_file.split('/')[1]
         assert target_dir in checked, f"target_dir {target_dir} not in {checked}"
@@ -49,23 +49,30 @@ def remove_and_rewrite_csv(spect_csv):
     
     spect_df.to_csv(spect_csv, index=False)
         
+def custome_sort(spect_csv):
+    bug_name = spect_csv.name.split('.')[0]
+    return int(bug_name[3:])
 
 def remove_unwanted_rows(sbfl_dataset_dir):
 
-    spectrum_dir = sbfl_dataset_dir / 'spectrum_feature_data_excluding_coincidentally_correct_tc_per_bug'
+    spectrum_dir = sbfl_dataset_dir / 'sbfl_features_per_bug-all'
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
+    bug_dirs = sorted(spectrum_dir.iterdir(), key=custome_sort)
+
     cnt = 0
-    for spect_csv in spectrum_dir.iterdir():
+    for spect_csv in bug_dirs:
+        bug_id = spect_csv.name.split('.')[0]
+        
         buggy_line_key = get_buggy_line(spect_csv)
         key_info = buggy_line_key.split('#')
-        bug_version = key_info[0].strip()
-        bug_target_file = key_info[1].strip()
-        bug_function_name = key_info[2].strip()
-        bug_line_num = int(key_info[3].strip())
+        # bug_version = key_info[0].strip()
+        bug_target_file = key_info[0].strip()
+        bug_function_name = key_info[1].strip()
+        bug_line_num = int(key_info[2].strip())
 
         cnt += 1
-        print(f"{cnt}: {buggy_line_key}")
+        print(f"{cnt}: {bug_id} {buggy_line_key}")
 
         remove_and_rewrite_csv(spect_csv)
         
