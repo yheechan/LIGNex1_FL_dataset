@@ -4,14 +4,15 @@ from pathlib import Path
 import sys
 import csv
 import math
+import subprocess as sp
 
 script_path = Path(__file__).resolve()
 bin_dir = script_path.parent
 main_dir = bin_dir.parent
 root_dir = main_dir.parent
 
-def get_tc(prerequisite_dir):
-    testcase_info_dir = prerequisite_dir / 'testcase_info'
+def get_tc(sbfl_dir, bug_id):
+    testcase_info_dir = sbfl_dir / 'test_case_info_per_bug_version' / bug_id
     assert testcase_info_dir.exists(), f"{testcase_info_dir} does not exist"
 
     failing_csv = testcase_info_dir / 'failing_testcases.csv'
@@ -53,8 +54,9 @@ def get_tc(prerequisite_dir):
 
     return failing_dict, passing_dict
 
-def get_buggy_line_key(prerequisite_dir):
-    buggy_line_key_txt = prerequisite_dir / 'buggy_line_key.txt'
+def get_buggy_line_key(sbfl_dir, bug_id):
+    filename = f"{bug_id}.buggy_line_key.txt"
+    buggy_line_key_txt = sbfl_dir / 'buggy_line_key_per_bug_version' / filename
     assert buggy_line_key_txt.exists(), f"{buggy_line_key_txt} does not exist"
 
     with open(buggy_line_key_txt, 'r') as f:
@@ -74,11 +76,12 @@ def validate_tc(total_tc, row_keys):
     for tc_id in tc_pack:
         assert tc_id in total_tc
 
-def get_cov_info(prerequisite_dir, failing_tc, passing_tc, buggy_line_key):
-    postprocessed_cov_data_dir = prerequisite_dir / 'postprocessed_coverage_data'
+def get_cov_info(sbfl_dir, bug_id, failing_tc, passing_tc, buggy_line_key):
+    filename = f"{bug_id}.cov_data.csv"
+    postprocessed_cov_data_dir = sbfl_dir / 'postprocessed_coverage_per_bug_version'
     assert postprocessed_cov_data_dir.exists(), f"{postprocessed_cov_data_dir} does not exist"
 
-    cov_data_csv = postprocessed_cov_data_dir / 'cov_data.csv'
+    cov_data_csv = postprocessed_cov_data_dir / filename
     assert cov_data_csv.exists(), f"{cov_data_csv} does not exist"
 
     total_tc_id = list(failing_tc.keys()) + list(passing_tc.keys())
@@ -241,21 +244,21 @@ def write_spectrum(sbfl_dir, bug_id, spectrum_per_line):
                 'bug': line_info['bug']
             })
 
-def custome_sort(bug_path):
-    return int(bug_path.name[3:])
+def custome_sort(pp_file):
+    return int(pp_file.name.split('.')[0][3:])
 
 def gen_sbfl_for_bug(sbfl_dir, bug_dir):
-    prerequisite_dir = bug_dir / 'prerequisite_data'
-    assert prerequisite_dir.exists(), f"{prerequisite_dir} does not exist"
-
+    bug_id = bug_dir.name.split('.')[0]
+    
     # get test case info {tc_id: tc_name}
-    failing_tc, passing_tc = get_tc(prerequisite_dir)
+    failing_tc, passing_tc = get_tc(sbfl_dir, bug_id)
 
-    # get buggy line key
-    buggy_line_key = get_buggy_line_key(prerequisite_dir)
+    # # get buggy line key
+    buggy_line_key = get_buggy_line_key(sbfl_dir, bug_id)
+    print(buggy_line_key)
 
     # get coverage data as dict format {key, tc1, tc2, ...}
-    cov_per_line = get_cov_info(prerequisite_dir, failing_tc, passing_tc, buggy_line_key)
+    cov_per_line = get_cov_info(sbfl_dir, bug_id, failing_tc, passing_tc, buggy_line_key)
 
     # initialize spectrum per line {key, ep, ef, np, nf}
     spectrum_per_line = init_spectrum_dict(cov_per_line, failing_tc, passing_tc, buggy_line_key)
@@ -263,7 +266,7 @@ def gen_sbfl_for_bug(sbfl_dir, bug_dir):
     # calculate total sbfl for each line
     spectrum_per_line = measure_total_sbfl(spectrum_per_line)
 
-    write_spectrum(sbfl_dir, bug_dir.name, spectrum_per_line)
+    write_spectrum(sbfl_dir, bug_id, spectrum_per_line)
 
     # for line_info in spectrum_per_line:
     #     line_key = line_info['key']
@@ -271,23 +274,23 @@ def gen_sbfl_for_bug(sbfl_dir, bug_dir):
     #         print(line_info)
     #         break
     
-def start_program(prequisite_dir_name, sbfl_dir_name):
-    prerequisite_dir = root_dir / 'prerequisite_dataset' / prequisite_dir_name
-    assert prerequisite_dir.exists(), f"{prerequisite_dir} does not exist"
-
+def start_program(sbfl_dir_name):
     sbfl_dir = root_dir / 'sbfl_datasets' / sbfl_dir_name
-    assert not sbfl_dir.exists(), f"{sbfl_dir} already exists"
-    sbfl_dir.mkdir()
+    assert sbfl_dir.exists(), f"{sbfl_dir} does not exists"
 
     all_dir = sbfl_dir / 'sbfl_features_per_bug-all'
-    assert not all_dir.exists(), f"{all_dir} already exists"
+    if all_dir.exists():
+        sp.run(f"rm -rf {all_dir}", shell=True)
     all_dir.mkdir()
-
     only_dir = sbfl_dir / 'sbfl_features_per_bug'
-    assert not only_dir.exists(), f"{only_dir} already exists"
+    if only_dir.exists():
+        sp.run(f"rm -rf {only_dir}", shell=True)
     only_dir.mkdir()
 
-    bug_dirs = sorted(prerequisite_dir.iterdir(), key=custome_sort)
+    pp_cov_dir = sbfl_dir / 'postprocessed_coverage_per_bug_version'
+    assert pp_cov_dir.exists(), f"{pp_cov_dir} does not exist"
+
+    bug_dirs = sorted(pp_cov_dir.iterdir(), key=custome_sort)
     cnt = 0
     for bug_dir in bug_dirs:
         cnt += 1
@@ -307,8 +310,7 @@ def start_program(prequisite_dir_name, sbfl_dir_name):
 
 
 if __name__ == '__main__':
-    prerequisite_dir_name = sys.argv[1]
-    sbfl_dir_name = sys.argv[2]
+    sbfl_dir_name = sys.argv[1]
 
-    start_program(prerequisite_dir_name, sbfl_dir_name)
+    start_program(sbfl_dir_name)
     
