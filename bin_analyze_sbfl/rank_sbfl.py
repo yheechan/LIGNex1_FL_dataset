@@ -152,7 +152,7 @@ def rank_sbfl_dataset(sbfl_dataset, wanted_name):
     result_list = []
 
     # spectrum_dir = sbfl_dataset / 'spectrum_feature_data_excluding_coincidentally_correct_tc_per_bug'
-    spectrum_dir = sbfl_dataset / 'sbfl_features_per_bug-all'
+    spectrum_dir = sbfl_dataset / 'sbfl_features_per_bug'
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
     bug_files = sorted(spectrum_dir.iterdir(), key=custome_sort)
