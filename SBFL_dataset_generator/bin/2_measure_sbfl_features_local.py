@@ -209,14 +209,12 @@ def measure_total_sbfl(spectrum_per_line):
     return spectrum_per_line
 
 def write_spectrum(sbfl_dir, bug_id, spectrum_per_line):
-    all_dir = sbfl_dir / 'sbfl_features_per_bug-all'
-    only_dir = sbfl_dir / 'sbfl_features_per_bug'
+    sbfl_feature_dir = sbfl_dir / 'sbfl_features_per_bug'
 
     filename = f"{bug_id}.sbfl_features.csv"
-    all_file = all_dir / filename
-    only_file = only_dir / filename
+    sbfl_feature_file = sbfl_feature_dir / filename
 
-    with open(all_file, 'w') as f:
+    with open(sbfl_feature_file, 'w') as f:
         writer = csv.DictWriter(f, fieldnames=[
             'key', 'ep', 'ef', 'np', 'nf',
             'Binary', 'GP13', 'Jaccard', 'Naish1',
@@ -227,22 +225,7 @@ def write_spectrum(sbfl_dir, bug_id, spectrum_per_line):
 
         for line_info in spectrum_per_line:
             writer.writerow(line_info)
-    
-    with open(only_file, 'w') as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            'key', 'ep', 'ef', 'np', 'nf', 'bug'
-        ])
-        writer.writeheader()
 
-        for line_info in spectrum_per_line:
-            writer.writerow({
-                'key': line_info['key'],
-                'ep': line_info['ep'],
-                'ef': line_info['ef'],
-                'np': line_info['np'],
-                'nf': line_info['nf'],
-                'bug': line_info['bug']
-            })
 
 def custome_sort(pp_file):
     return int(pp_file.name.split('.')[0][3:])
@@ -278,14 +261,10 @@ def start_program(sbfl_dir_name):
     sbfl_dir = root_dir / 'sbfl_datasets' / sbfl_dir_name
     assert sbfl_dir.exists(), f"{sbfl_dir} does not exists"
 
-    all_dir = sbfl_dir / 'sbfl_features_per_bug-all'
-    if all_dir.exists():
-        sp.run(f"rm -rf {all_dir}", shell=True)
-    all_dir.mkdir()
-    only_dir = sbfl_dir / 'sbfl_features_per_bug'
-    if only_dir.exists():
-        sp.run(f"rm -rf {only_dir}", shell=True)
-    only_dir.mkdir()
+    sbfl-feature_dir = sbfl_dir / 'sbfl_features_per_bug'
+    if sbfl-feature_dir.exists():
+        sp.run(f"rm -rf {sbfl-feature_dir}", shell=True)
+    sbfl-feature_dir.mkdir()
 
     pp_cov_dir = sbfl_dir / 'postprocessed_coverage_per_bug_version'
     assert pp_cov_dir.exists(), f"{pp_cov_dir} does not exist"
