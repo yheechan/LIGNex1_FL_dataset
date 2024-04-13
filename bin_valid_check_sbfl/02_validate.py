@@ -14,8 +14,8 @@ def custom_sort(bug_dir):
     return int(bug_dir.name[3:])
 
 
-def check_for_mutant(mbfl_dir, bug_id, target_code, line_num, after_mutation):
-    code_file = mbfl_dir / 'buggy_code_file_per_bug_version' / bug_id / target_code
+def check_for_mutant(sbfl_dir, bug_id, target_code, line_num, after_mutation):
+    code_file = sbfl_dir / 'buggy_code_file_per_bug_version' / bug_id / target_code
     assert code_file.exists(), f"{code_file} does not exist"
 
     file_fp = open(code_file, 'r')
@@ -41,8 +41,8 @@ def check_for_mutant(mbfl_dir, bug_id, target_code, line_num, after_mutation):
 
 
 
-def validate_02(mbfl_dir):
-    mutantion_info_csv = mbfl_dir / "bug_version_mutation_info.csv"
+def validate_02(sbfl_dir):
+    mutantion_info_csv = sbfl_dir / "bug_version_mutation_info.csv"
     assert mutantion_info_csv.exists(), f"{mutantion_info_csv} does not exist"
 
     invalid_bugs = []
@@ -64,7 +64,7 @@ def validate_02(mbfl_dir):
             before_mutation = info[4]
             after_mutation = info[5]
 
-            result = check_for_mutant(mbfl_dir, bug_id, target_code, line_num, after_mutation)
+            result = check_for_mutant(sbfl_dir, bug_id, target_code, line_num, after_mutation)
             if result == 1:
                 invalid_bugs.append(bug_id)
     
@@ -82,8 +82,8 @@ def validate_02(mbfl_dir):
 
 
 if __name__ == "__main__":
-    mbfl_dataset_dir_name = sys.argv[1]
-    mbfl_dir = root_dir / 'mbfl_datasets' / mbfl_dataset_dir_name
-    assert mbfl_dir.exists(), f"mbfl dataset {mbfl_dir} does not exist"
+    sbfl_dataset_dir_name = sys.argv[1]
+    sbfl_dir = root_dir / 'sbfl_datasets' / sbfl_dataset_dir_name
+    assert sbfl_dir.exists(), f"sbfl dataset {sbfl_dir} does not exist"
 
-    validate_02(mbfl_dir)
+    validate_02(sbfl_dir)

@@ -10,7 +10,8 @@ root_dir = bin_dir.parent
 
 # 01: VALIDATE THE EXISTENCE OF BUGGY LINE IN EACH SPECTRUM FEATURE CSV FILE
 def validate_01(sbfl_dataset):
-    spectrum_dir = sbfl_dataset / 'spectrum_feature_data_excluding_coincidentally_correct_tc_per_bug'
+    # spectrum_dir = sbfl_dataset / 'sbfl_features_per_bug'
+    spectrum_dir = sbfl_dataset / 'sbfl_features_per_bug-all'
     assert spectrum_dir.exists(), f"{spectrum_dir} does not exist"
 
     for spect_csv in spectrum_dir.iterdir():
@@ -19,7 +20,7 @@ def validate_01(sbfl_dataset):
             reader = csv.reader(f)
             header = next(reader)
             for row in reader:
-                bug_stat = int(row[13])
+                bug_stat = int(row[5])
                 if bug_stat == 1:
                     buggy_line_found = True
                     break
