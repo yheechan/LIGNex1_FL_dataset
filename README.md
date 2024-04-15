@@ -8,6 +8,7 @@
 * ``bin_analyze_mbfl``: directory containing executables to analyze MBFL feature dataset.
 * ``bin_analyze_sbfl``: directory containing executables to analyze SBFL feature dataset.
 * ``bin_cmd_machiens``: directory containing executables to handline commands in distributed machines with ease.
+* ``bin_combine_FL``: directory containing executables to combine target SBFL and MBFL feature datasets.
 * ``bin_jsoncpp_clone``: directory containing executables to clone, build, and measure coverage of a target jsoncpp project.
 * ``bin_postprocess_mbfl_dataset``: directory containing executables to postprocess (or massage) & reorganize (or gather) MBFL feature dataset.
 * ``bin_postprocess_sbfl_data``: directory containing executables to postprocess (or massage) & reorganize (or gather) SBFL feature dataset.
@@ -31,6 +32,7 @@
 
 
 ### dataset: generated dataset (ignored in git repository)
+* ``fl_datasets``: contains dataset for fault localization combining both SBFL and MBFL features.
 * ``mbfl_dataset_b4_gather``: contains MBFL dataset retrieved from distributed machines
 * ``mbfl_datasets``: contains MBFL dataset results from MBFL dataset generating tool (Re-organize retrieved dataset from distributed machines).
 * ``sbfl_datasets``: contains SBFL dataset results from SBFL dataset generating tool.
@@ -46,6 +48,6 @@
 
 
 
-last update on April 10, 2024
+last update on April 13, 2024
 
 

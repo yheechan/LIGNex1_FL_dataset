@@ -1,5 +1,6 @@
 sbfl_datasets/
 mbfl_datasets/
+fl_datasets/
 mbfl_dataset_b4_gather/
 
 bug_versions_codes/
