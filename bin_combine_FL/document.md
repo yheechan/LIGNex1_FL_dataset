@@ -34,7 +34,7 @@
     ```
 
 ### 3.2 데이터셋 사이즈
-* zip 파일 사이즈: 16,665,913 바이트
+* zip 파일 사이즈: 16,666,159 바이트
 
 ## 4. 버그 버전 정보
 * 버그 개수
@@ -51,7 +51,7 @@
     bug2 | [ossfuzz #18147](https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18147&q=jsoncpp&can=1&sort=-summary) | json_reader.cpp |  1279 | heap overflow
     bug3 | [ossfuzz #21916](https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=21916&q=jsoncpp&can=1) | json_reader.cpp | 1628 | integer overflow
 
-* 인공 버그 (총 3개)
+* 인공 버그 (총 162개)
     * ``bug_version_mutation_info.csv`` 파일에서 각 버그 버전 별로 인공적으로 생성된 버그(변형) 정보를 확인 할 수 있습니다.
 
 
@@ -104,3 +104,25 @@
         - $f_P(s) (\text{or } p_P(s))$: 대상 프로그램 $P$에서 라인 $s$를 실행하고 fail (or pass)하는 테스트 케이스들의 집합
         - $f_m (\text{or }p_m)$: 변형 $m$에 대해 fail (or pass)하는 테스트 케이스들의 집합
         - $f2p (\text{or }p2f)$: 대상 프로그램 $P$의 모든 변형들에 대해서 fail에서 pass (or pass에서 fail)로 바뀐 테스트 케이스들의 개수
+
+
+## 7. 데이터셋의 실제 오류 탐지 정확도 평가 (총 165개 버그 버전, 총 363개 함수)
+
+### 스펙트럼 기반 정확도 (SBFL)
+SBFL 공식 | ``acc@5`` 버그 개수 | ``acc@5`` 정확도 백분율 | ``acc@10`` 버그 개수 | ``acc@10`` 정확도 백분율
+--- | --- | --- | --- | --- |
+Binary | 0 | 0.00% | 0 | 0.00%
+GP13 | 1136 | 82.42% | 153 | 92.72%
+Jaccard | 1136 | 82.42% | 153 | 92.72%
+Naish1 | 1136 | 82.42% | 153 | 92.72%
+Naish2 | 1136 | 82.42% | 153 | 92.72%
+Ochiai | 1136 | 82.42% | 153 | 92.72%
+Russel+Rao | 0 | 0.00% | 0 | 0.00%
+Wong1 | 0 | 0.00% | 0 | 0.00%
+
+
+### 변이 기반 정확도 (MBFL)
+MBFL 공식 | ``acc@5`` 버그 개수 | ``acc@5`` 정확도 백분율 | ``acc@10`` 버그 개수 | ``acc@10`` 정확도 백분율
+--- | --- | --- | --- | --- |
+Metallaxis | 4 | 2.42% | 7 | 4.24%
+MUSE | 159 | 96.36% | 165 | 100.00%
