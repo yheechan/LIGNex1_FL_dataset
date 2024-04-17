@@ -24,7 +24,7 @@
 * ``test_case_info_per_bug_version/``: 각 버그 버전 별로 사용된 테스트 케이스 분류 정보 (통과(pass), 실패(fail), 우연히 통과한(coincidentally correct) 테스트 케이스)
 
     ```
-    fl_dataset-240416-v2/
+    fl_dataset-240417-v1/
         ├── buggy_code_file_per_bug_version
         ├── buggy_line_key_per_bug_version
         ├── bug_version_mutation_info.csv
@@ -100,6 +100,9 @@ bug3 | [ossfuzz #21916](https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=21
         * $\text{notkill}(m)$: 변형 $m$을 죽이지 못한 테스트 케이스들의 개수
 
 * **MUSE**
+    * ``muse_a``: $|\text{mut}(s)|$
+    * ``muse_b``: $f2p$
+    * ``muse_c``: $p2f$
     * ``muse_1``: $\frac{1}{{|\text{mut}(s)| + 1}}$
     * ``muse_2``: $\sum_{m \in \text{mut}(s)} |f_P(s) \cap p_m|$
     * ``muse_3``: $\sum_{m \in \text{mut}(s)} |p_P(s) \cap f_m|$

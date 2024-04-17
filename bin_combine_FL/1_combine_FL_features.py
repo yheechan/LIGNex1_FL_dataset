@@ -71,6 +71,7 @@ def write_fl_features(fl_feature_file, fl_features_per_line):
         fieldnames = [
             'key', 'ep', 'ef', 'np', 'nf',
             'met_1', 'met_2', 'met_3', 'met_4',
+            'muse_a', 'muse_b', 'muse_c',
             'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6',
             'bug'
         ]
@@ -158,6 +159,9 @@ def start_program(sbfl, mbfl, fl):
                 'met_2': mbfl_row['met_2'],
                 'met_3': mbfl_row['met_3'],
                 'met_4': mbfl_row['met_4'],
+                'muse_a': mbfl_row['muse_a'],
+                'muse_b': mbfl_row['muse_b'],
+                'muse_c': mbfl_row['muse_c'],
                 'muse_1': mbfl_row['muse_1'],
                 'muse_2': mbfl_row['muse_2'],
                 'muse_3': mbfl_row['muse_3'],

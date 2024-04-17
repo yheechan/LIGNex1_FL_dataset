@@ -26,7 +26,7 @@ def get_buggy_line(feature_csv):
         reader = csv.reader(f)
         header = next(reader)
         for row in reader:
-            bug_stat = int(row[11])
+            bug_stat = int(row[14])
             if bug_stat == 1:
                 # (ex) src/lib_json/json_writer.cpp # valuetoString() # 95
                 buggy_line_key = row[0]

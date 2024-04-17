@@ -203,14 +203,14 @@ def get_susp_scores(mbfl_dataset_dir, bug_id, buggy_line_key):
 
     data = None
     with open(susp_scores_csv, 'r') as file:
-        reader = csv.reader(file)
-        next(reader)
+        reader = csv.DictReader(file)
+        # next(reader)
 
         for row in reader:
-            line_key = row[0]
-            met_score = float(row[1])
-            muse_score = float(row[2])
-            is_bug = row[11]
+            line_key = row['key']
+            met_score = float(row['met_4'])
+            muse_score = float(row['muse_6'])
+            is_bug = row['bug']
 
             if line_key == buggy_line_key:
                 assert is_bug == '1', f'{buggy_line_key} is not a bug'
@@ -256,6 +256,7 @@ def get_rank_at_method_level(mbfl_dataset_dir, bug_id, buggy_line_key, formula):
     mbfl_features_df = mbfl_features_df[[
         'target_file', 'function_name', 'line_num',
         'met_1', 'met_2', 'met_3', 'met_4',
+        'muse_a', 'muse_b', 'muse_c',
         'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6',
         'bug'
     ]]
