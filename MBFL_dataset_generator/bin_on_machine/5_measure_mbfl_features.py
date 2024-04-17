@@ -103,13 +103,16 @@ def get_per_mutant_tc_results(mutant_dir):
     return p2f, f2p, p2p, f2f
 
 def measure_mbfl_features(core_dir, lines_list, mutant_dict):
+    # for a single bug version
     total_p2f, total_f2p = get_total_tc_results(core_dir)
     line_features = {}
 
+    # for a target file of a bug version
     for target_file in mutant_dict.keys():
         if target_file not in line_features:
             line_features[target_file] = {}
         
+        # for a target line of a target file
         for line_key in mutant_dict[target_file].keys():
             
             line2mutant_cnt = 0
@@ -117,6 +120,10 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
             line2met_2 = []
             line2met_3 = []
             line2met_4 = []
+
+            muse_a = 0
+            muse_b = 0
+            muse_c = 0
             
             muse_1 = 0
             muse_2 = 0
@@ -187,6 +194,10 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
                 met_3 = max(line2met_3)
                 met_4 = max(line2met_4)
 
+            muse_a = line2mutant_cnt
+            muse_b = total_f2p
+            muse_c = total_p2f
+
             muse_1 = 1 / (line2mutant_cnt + 1)
             muse_4 = (1 / ((line2mutant_cnt + 1) * (total_f2p + 1))) * muse_2
             muse_5 = (1 / ((line2mutant_cnt + 1) * (total_p2f + 1))) * muse_3
@@ -198,6 +209,7 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
             line_features[target_file][line_key] = {
                 'met_1': met_1, 'met_2': met_2,
                 'met_3': met_3, 'met_4': met_4,
+                'muse_a': muse_a, 'muse_b': muse_b, 'muse_c': muse_c,
                 'muse_1': muse_1, 'muse_2': muse_2,
                 'muse_3': muse_3, 'muse_4': muse_4,
                 'muse_5': muse_5, 'muse_6': muse_6
@@ -212,14 +224,17 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
 def process2csv(core_dir, line_features, lines_list, buggy_line):
     default = {
         'met_1': 0, 'met_2': 0, 'met_3': 0, 'met_4': 0,
+        'muse_a': 0, 'muse_b': 0, 'muse_c': 0,
         'muse_1': 0, 'muse_2': 0, 'muse_3': 0, 'muse_4': 0, 'muse_5': 0, 'muse_6': 0, 'bug': 0
     }
 
     csv_file = core_dir / 'mbfl_data/mbfl_features.csv'
     
+    # write to csv file
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=[
             'key', 'met_1', 'met_2', 'met_3', 'met_4',
+            'muse_a', 'muse_b', 'muse_c',
             'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6', 'bug'
         ])
 
@@ -232,11 +247,15 @@ def process2csv(core_dir, line_features, lines_list, buggy_line):
             target_file = file_path.split('/')[-1]
 
             buggy_stat = 0
+            # Change buggy_stat to 1 if the line is buggy line
             if line == buggy_line:
                 buggy_stat = 1
 
             if target_file in line_features:
                 line_id = 'line_{}'.format(line_number)
+                
+                # if the line is in the line_features
+                # else use default values
                 if line_id in line_features[target_file]:
                     line_features[target_file][line_id]['bug'] = buggy_stat
                     writer.writerow({
