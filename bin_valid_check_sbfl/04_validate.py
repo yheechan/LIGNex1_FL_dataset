@@ -74,7 +74,7 @@ def validate_04(sbfl_dir):
     cnt = 0
     for bug_id in bug_versions:
         cnt += 1
-        print(f"{cnt}: processing {bug_id}")
+        print(f"{cnt}: Validating {bug_id}")
 
         # get test cases
         failing_tcs = get_tcs(sbfl_dir, bug_id, 'failing')
