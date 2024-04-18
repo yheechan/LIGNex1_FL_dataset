@@ -37,6 +37,34 @@ def remove_and_rewrite_csv(feature_csv):
     unwanted = ['jsontestrunner', 'test_lib_json', 'CMakeFiles']
     checked = ['jsontestrunner', 'test_lib_json', 'json', 'lib_json', 'CMakeFiles']
 
+    wanted_lines = []
+
+    with open(feature_csv, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            key = row['key']
+            curr_key_info = key.split('#')
+            # curr_version = curr_key_info[0].strip()
+            curr_target_file = curr_key_info[0].strip()
+            curr_function_name = curr_key_info[1].strip()
+            curr_line_num = int(curr_key_info[2].strip())
+
+            target_dir = curr_target_file.split('/')[1]
+            assert target_dir in checked, f"target_dir {target_dir} not in {checked}"
+
+            if target_dir not in unwanted:
+                wanted_lines.append(row)
+
+    with open(feature_csv, 'w') as f:
+        writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
+        writer.writeheader()
+        for row in wanted_lines:
+            writer.writerow(row)
+
+def remove_and_rewrite_csv_pandas(feature_csv):
+    unwanted = ['jsontestrunner', 'test_lib_json', 'CMakeFiles']
+    checked = ['jsontestrunner', 'test_lib_json', 'json', 'lib_json', 'CMakeFiles']
+
     feature_df = pd.read_csv(feature_csv)
 
     for index, row in feature_df.iterrows():
