@@ -28,13 +28,25 @@ def get_mutant_dict(core_dir):
 
     mutant_dict = {}
     with open(mutant_db_csv, 'r') as csv_fp:
-        csv_reader = csv.reader(csv_fp)
-        next(csv_reader)
-        for row in csv_reader:
-            target_file = row[0]
-            line_number = int(row[1])
-            mutant_id = row[2]
-            mutant_name = row[3]
+        # csv_reader = csv.reader(csv_fp)
+        # next(csv_reader)
+        lines = csv_fp.readlines()
+
+        # for row in csv_reader:
+        for line in lines[1:]:
+            info = line.strip().split(',')
+            target_file = info[0]
+            line_number = int(info[1])
+            mutant_id = info[2]
+            mutant_name = info[3]
+
+            # using CSV (UPDATED: NOT USING CSV BECAUSE MUTANT TOKEN CONTAINS COMPILCATED COMMANS AND QUOTES)
+            # target_file = row[0]
+            # line_number = int(row[1])
+            # mutant_id = row[2]
+            # mutant_name = row[3]
+
+            # not using
             # mutation_operator = row[4]
             # before_mutation = row[5]
             # after_mutation = row[6]
@@ -76,10 +88,12 @@ def check_build_results(mutant_dir):
     build_result_fp.close()
 
     line = lines[0].strip()
-    if line == 'build-success':
-        return True
-    else:
+    if line == 'build-failed':
         return False
+    else:
+        if line != 'build-success':
+            print(f'Unexpected build result: {line}')
+        return True
 
 def get_per_mutant_tc_results(mutant_dir):
     p2f = 0
@@ -102,11 +116,14 @@ def get_per_mutant_tc_results(mutant_dir):
 
     return p2f, f2p, p2p, f2f
 
-def measure_mbfl_features(core_dir, lines_list, mutant_dict):
+def get_mbfl_features(core_dir, lines_list, mutant_dict):
     # for a single bug version
     total_p2f, total_f2p = get_total_tc_results(core_dir)
-    line_features = {}
 
+    total_p2f_recalc = 0
+    total_f2p_recalc = 0
+
+    line_features = {}
     # for a target file of a bug version
     for target_file in mutant_dict.keys():
         if target_file not in line_features:
@@ -116,26 +133,14 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
         for line_key in mutant_dict[target_file].keys():
             
             line2mutant_cnt = 0
-            line2met_1 = []
-            line2met_2 = []
-            line2met_3 = []
-            line2met_4 = []
-
-            muse_a = 0
-            muse_b = 0
-            muse_c = 0
-            
-            muse_1 = 0
-            muse_2 = 0
-            muse_3 = 0
-            muse_4 = 0
-            muse_5 = 0
-            muse_6 = 0
-            # print('target_file: ', target_file)
-            # print('line_key: ', line_key)
-            # print('# of mutants: ', len(mutant_dict[target_file][line_key]))
             build_failed = 0
+
+            if line_key not in line_features[target_file]:
+                line_features[target_file][line_key] = []
+
+            # for a mutant of a target line of a target file
             for mutant in mutant_dict[target_file][line_key]:
+
                 mutant_id = mutant['mutant_id']
                 mutant_name = mutant['mutant_name']
 
@@ -146,97 +151,261 @@ def measure_mbfl_features(core_dir, lines_list, mutant_dict):
                     line2mutant_cnt += 1
                 else:
                     build_failed += 1
+                    line_features[target_file][line_key].append({
+                        'mutant_id': mutant_id,
+                        'mutant_name': mutant_name,
+                        'build_failed': True,
+                        'p2f': -1, 'f2p': -1, 'p2p': -1, 'f2f': -1,
+                    })
                     continue
 
                 # get per mutant tc results
                 p2f, f2p, p2p, f2f = get_per_mutant_tc_results(mutant_dir)
 
-                # measuring metallaxis
-                # killed(m) = p2f + f2p
-                # notkilled(m) = p2p + f2f
-                killed = p2f + f2p
-                notkilled = p2p + f2f
-
-                # only when mutant was killed
-                if killed > 0:
-                    met_1 = killed
-                    
-                    if killed == 0:
-                        met_2 = 0
-                    else:
-                        met_2 = 1 / math.sqrt(killed)
-                    met_3 = 1 / math.sqrt(killed + notkilled)
-                    if killed == 0:
-                        met_4 = 0
-                    else:
-                        met_4 = killed / math.sqrt(killed * (killed + notkilled))
                 
-                    line2met_1.append(met_1)
-                    line2met_2.append(met_2)
-                    line2met_3.append(met_3)
-                    line2met_4.append(met_4)
 
-                # measuring muse
-                muse_2 += f2p
-                muse_3 += p2f
-            # print('# of build failed mutants: ', build_failed)
-            if build_failed == len(mutant_dict[target_file][line_key]):
-                continue
+                # ACCUMULATE DATA ON EACH MUTANT OF EACH LINE OF EACH FILE
+                line_features[target_file][line_key].append({
+                    'mutant_id': mutant_id,
+                    'mutant_name': mutant_name,
+                    'build_failed': False,
+                    'p2f': p2f, 'f2p': f2p, 'p2p': p2p, 'f2f': f2f
+                })
 
-            if len(line2met_1) == 0:
-                met_1 = 0
-                met_2 = 0
-                met_3 = 0
-                met_4 = 0
-            else:
-                met_1 = max(line2met_1)
-                met_2 = max(line2met_2)
-                met_3 = max(line2met_3)
-                met_4 = max(line2met_4)
+                # accumulate p2f and f2p for recalculation assertion
+                total_p2f_recalc += p2f
+                total_f2p_recalc += f2p
+        
+            # append dummy mutant until each line get 12 mutants
+            assert len(line_features[target_file][line_key]) <= 12, f'{linefeatures[target_file][line_key]} > 12'
+            for i in range(12 - len(line_features[target_file][line_key])):
+                line_features[target_file][line_key].append({
+                    'mutant_id': -1,
+                    'mutant_name': 'dummy',
+                    'build_failed': False,
+                    'p2f': -1, 'f2p': -1, 'p2p': -1, 'f2f': -1
+                })
+            assert len(line_features[target_file][line_key]) == 12, f'{len(line_features[target_file][line_key])} != 12'
+        
+    
+    assert total_f2p == total_f2p_recalc, f'{total_f2p} != {total_f2p_recalc}'
+    assert total_p2f == total_p2f_recalc, f'{total_p2f} != {total_p2f_recalc}'
+    # print(f"total_f2p: {total_f2p_recalc}, total_f2p_recalc: {total_f2p}")
+    # print(f"total_p2f: {total_p2f_recalc}, total_p2f_recalc: {total_p2f}")
 
-            muse_a = line2mutant_cnt
-            muse_b = total_f2p
-            muse_c = total_p2f
 
-            muse_1 = 1 / (line2mutant_cnt + 1)
-            muse_4 = (1 / ((line2mutant_cnt + 1) * (total_f2p + 1))) * muse_2
-            muse_5 = (1 / ((line2mutant_cnt + 1) * (total_p2f + 1))) * muse_3
-            muse_6 = muse_4 - muse_5
+    return line_features, total_p2f_recalc, total_f2p_recalc
 
-            if line_key not in line_features[target_file]:
-                line_features[target_file][line_key] = {}
-            
-            line_features[target_file][line_key] = {
-                'met_1': met_1, 'met_2': met_2,
-                'met_3': met_3, 'met_4': met_4,
-                'muse_a': muse_a, 'muse_b': muse_b, 'muse_c': muse_c,
-                'muse_1': muse_1, 'muse_2': muse_2,
-                'muse_3': muse_3, 'muse_4': muse_4,
-                'muse_5': muse_5, 'muse_6': muse_6
-            }
-    return line_features
+    # for target_file in line_features.keys():
+    #     for line_key in line_features[target_file].keys():
+    #         for key in line_features[target_file][line_key].keys():
+    #             print(f'{target_file}, {line_key}, {key}: {line_features[target_file][line_key][key]}')
 
-    for target_file in line_features.keys():
-        for line_key in line_features[target_file].keys():
-            for key in line_features[target_file][line_key].keys():
-                print(f'{target_file}, {line_key}, {key}: {line_features[target_file][line_key][key]}')
+def measure_metallaxis(line_data, f2p_p2f_key_list):
+    total_failing_tc_count = line_data['# of totfailed_TCs']
 
-def process2csv(core_dir, line_features, lines_list, buggy_line):
-    default = {
-        'met_1': 0, 'met_2': 0, 'met_3': 0, 'met_4': 0,
-        'muse_a': 0, 'muse_b': 0, 'muse_c': 0,
-        'muse_1': 0, 'muse_2': 0, 'muse_3': 0, 'muse_4': 0, 'muse_5': 0, 'muse_6': 0, 'bug': 0
+    met_score_list = []
+    # per mutant
+    cnt = 0
+    for f2p_m, p2f_m in f2p_p2f_key_list:
+        cnt += 1
+        f2p = line_data[f2p_m]
+        p2f = line_data[p2f_m]
+
+        if f2p == -1:
+            assert p2f == -1, f'{p2f} != -1'
+            continue
+        if p2f == -1:
+            assert f2p == -1, f'{f2p} != -1'
+            continue
+
+        score = 0.0
+        if f2p + p2f == 0:
+            score = 0.0
+        else:
+            score = ((f2p) / math.sqrt(total_failing_tc_count * (f2p + p2f)))
+
+        met_score_list.append(score)
+
+    assert cnt == 12, f'{cnt} != 12'
+
+    if len(met_score_list) == 0:
+        return 0.0
+
+    final_met_score = max(met_score_list)
+    return final_met_score
+
+
+def measure_muse(line_data, total_f2p, total_p2f, f2p_p2f_key_list):
+    utilized_mutant_cnt = 0
+    line_total_f2p = 0
+    line_total_p2f = 0
+
+    final_muse_score = 0.0
+
+    cnt = 0
+    for f2p_m, p2f_m in f2p_p2f_key_list:
+        cnt += 1
+        f2p = line_data[f2p_m]
+        p2f = line_data[p2f_m]
+
+        if f2p == -1:
+            assert p2f == -1, f'{p2f} != -1'
+            continue
+        if p2f == -1:
+            assert f2p == -1, f'{f2p} != -1'
+            continue
+
+        utilized_mutant_cnt += 1
+        line_total_p2f += p2f
+        line_total_f2p += f2p
+    
+    assert cnt == 12, f'{cnt} != 12'
+
+    muse_1 = (1 / ((utilized_mutant_cnt + 1) * (total_f2p + 1)))
+    muse_2 = (1 / ((utilized_mutant_cnt + 1) * (total_p2f + 1)))
+
+    muse_3 = muse_1 * line_total_f2p
+    muse_4 = muse_2 * line_total_p2f
+
+    final_muse_score = muse_3 - muse_4
+    
+    muse_data = {
+        '|mut(s)|': utilized_mutant_cnt,
+        'total_f2p': total_f2p,
+        'total_p2f': total_p2f,
+        'line_total_f2p': line_total_f2p,
+        'line_total_p2f': line_total_p2f,
+        'muse_1': muse_1,
+        'muse_2': muse_2,
+        'muse_3': muse_3,
+        'muse_4': muse_4,
+        'muse susp. score': final_muse_score
     }
 
+    return muse_data
+
+
+
+def measure_mbfl_features(line_features, total_p2f, total_f2p, total_failing_tc_count):
+    measured_features = {}
+
+    recalc_total_p2f = 0
+    recalc_total_f2p = 0
+
+    for target_file in line_features.keys():
+        if target_file not in measured_features:
+            measured_features[target_file] = {}
+        
+        for line_key in line_features[target_file].keys():
+            if line_key not in measured_features[target_file]:
+                measured_features[target_file][line_key] = {}
+            
+            measured_features[target_file][line_key]['# of totfailed_TCs'] = total_failing_tc_count
+            
+            cnt = 0
+            f2p_p2f_key_list = []
+            for mutant in line_features[target_file][line_key]:
+                mutant_id = mutant['mutant_id']
+                
+                p2f = mutant['p2f']
+                f2p = mutant['f2p']
+                p2p = mutant['p2p']
+                f2f = mutant['f2f']
+
+                mutant_name = mutant['mutant_name']
+                build_failed = mutant['build_failed']
+
+                # VALIDATION
+                if build_failed or mutant_name == 'dummy':
+                    assert p2f == -1 and f2p == -1, f'{p2f} != -1 or {f2p} != -1'
+                
+                if p2f == -1:
+                    assert build_failed or (mutant_name == 'dummy')
+                    assert f2p == -1, f'{f2p} != -1'
+                if f2p == -1:
+                    assert build_failed or (mutant_name == 'dummy')
+                    assert p2f == -1, f'{p2f} != -1'
+
+                    
+                cnt += 1
+                f2p_name = f"m{cnt}:f2p"
+                p2f_name = f"m{cnt}:p2f"
+
+                assert f2p_name not in measured_features[target_file][line_key]
+                assert p2f_name not in measured_features[target_file][line_key]
+                f2p_p2f_key_list.append((f2p_name, p2f_name))
+
+                measured_features[target_file][line_key][f2p_name] = f2p
+                measured_features[target_file][line_key][p2f_name] = p2f
+
+                if p2f != -1 or f2p != -1:
+                    recalc_total_p2f += p2f
+                    recalc_total_f2p += f2p
+
+            assert cnt == 12, f'{cnt} != 12'
+            measured_features[target_file][line_key]['# of mutants'] = cnt
+
+            met_score = measure_metallaxis(measured_features[target_file][line_key], f2p_p2f_key_list)
+            measured_features[target_file][line_key]['met susp. score'] = met_score
+
+            muse_data = measure_muse(measured_features[target_file][line_key], total_f2p, total_p2f, f2p_p2f_key_list)
+            for key, value in muse_data.items():
+                assert key not in measured_features[target_file][line_key]
+                measured_features[target_file][line_key][key] = value
+
+            # print(f'{target_file}, {line_key}, met: {met_score}')
+            # print(f'{target_file}, {line_key}, muse: {muse_data["muse susp. score"]}')
+    
+    assert total_f2p == recalc_total_f2p, f'{total_f2p} != {recalc_total_f2p}'
+    assert total_p2f == recalc_total_p2f, f'{total_p2f} != {recalc_total_p2f}'
+    return measured_features
+
+
+def process2csv(core_dir, line_features, lines_list, buggy_line, total_failing_tc_count):
+    # default = {
+    #     'met_1': 0, 'met_2': 0, 'met_3': 0, 'met_4': 0,
+    #     'muse_a': 0, 'muse_b': 0, 'muse_c': 0,
+    #     'muse_1': 0, 'muse_2': 0, 'muse_3': 0, 'muse_4': 0, 'muse_5': 0, 'muse_6': 0, 'bug': 0
+    # }
+
+    
+
     csv_file = core_dir / 'mbfl_data/mbfl_features.csv'
+
+    f2p_p2f_key_default_dict = {}
+    for i in range(1, 13):
+        f2p_name = f'm{i}:f2p'
+        p2f_name = f'm{i}:p2f'
+        f2p_p2f_key_default_dict[f2p_name] = -1
+        f2p_p2f_key_default_dict[p2f_name] = -1
+    
+    default = {
+        '# of totfailed_TCs': total_failing_tc_count,
+        '# of mutants': len(f2p_p2f_key_default_dict) // 2,
+        '|mut(s)|': 0, 'total_f2p': 0, 'total_p2f': 0,
+        'line_total_f2p': 0, 'line_total_p2f': 0,
+        'muse_1': 0, 'muse_2': 0, 'muse_3': 0, 'muse_4': 0,
+        'muse susp. score': 0.0, 'met susp. score': 0.0, 'bug': 0,
+        **f2p_p2f_key_default_dict
+    }
     
     # write to csv file
     with open(csv_file, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=[
-            'key', 'met_1', 'met_2', 'met_3', 'met_4',
-            'muse_a', 'muse_b', 'muse_c',
-            'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6', 'bug'
-        ])
+        # writer = csv.DictWriter(file, fieldnames=[
+        #     'key', 'met_1', 'met_2', 'met_3', 'met_4',
+        #     'muse_a', 'muse_b', 'muse_c',
+        #     'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6', 'bug'
+        # ])
+
+        fieldnames = ['key', '# of totfailed_TCs', '# of mutants'] + list(f2p_p2f_key_default_dict.keys()) + [
+            '|mut(s)|', 'total_f2p', 'total_p2f',
+            'line_total_f2p', 'line_total_p2f',
+            'muse_1', 'muse_2', 'muse_3', 'muse_4',
+            'muse susp. score', 'met susp. score', 'bug'
+        ]
+
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
 
         writer.writeheader()
 
@@ -287,6 +456,28 @@ def get_buggy_line(core_dir):
 
     return buggy_line_key
 
+def get_tc_dict(core_dir):
+    tc_dict = {
+        'failing_testcases.csv': [],
+        'passing_testcases.csv': []
+    }
+
+    testcase_info_dir = core_dir / 'prerequisite_data/testcase_info'
+    for tc_type in tc_dict.keys():
+        tc_file = testcase_info_dir / tc_type
+        assert tc_file.exists(), f'{tc_file} does not exist'
+
+        tc_fp = open(tc_file, 'r')
+        lines = tc_fp.readlines()
+        tc_fp.close()
+
+        for line in lines[1:]:
+            info = line.strip().split(',')
+            tc_id = info[0]
+            tc_name = info[1]
+            tc_dict[tc_type].append([tc_id, tc_name])
+    
+    return tc_dict
 
 
 if __name__ == "__main__":
@@ -295,11 +486,18 @@ if __name__ == "__main__":
 
     lines_list = get_lines_list(core_dir)
     mutant_dict = get_mutant_dict(core_dir)
-    line_features = measure_mbfl_features(core_dir, lines_list, mutant_dict)
+    tc_dict = get_tc_dict(core_dir)
+    total_failing_tc_count = len(tc_dict['failing_testcases.csv'])
+
+    # get pre-required mbfl feature before susp. score measurement
+    line_features, total_p2f, total_f2p = get_mbfl_features(core_dir, lines_list, mutant_dict)
+
+    # measure susp. score
+    measure_features_per_line = measure_mbfl_features(line_features, total_p2f, total_f2p, total_failing_tc_count)
 
     buggy_line = get_buggy_line(core_dir)
     print(buggy_line)
     assert buggy_line in lines_list
-    process2csv(core_dir, line_features, lines_list, buggy_line)
+    process2csv(core_dir, measure_features_per_line, lines_list, buggy_line, total_failing_tc_count)
 
 
