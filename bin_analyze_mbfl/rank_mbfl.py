@@ -208,8 +208,10 @@ def get_susp_scores(mbfl_dataset_dir, bug_id, buggy_line_key):
 
         for row in reader:
             line_key = row['key']
-            met_score = float(row['met_4'])
-            muse_score = float(row['muse_6'])
+            # met_score = float(row['met_4'])
+            # muse_score = float(row['muse_6'])
+            met_score = float(row['met susp. score'])
+            muse_score = float(row['muse susp. score'])
             is_bug = row['bug']
 
             if line_key == buggy_line_key:
@@ -253,13 +255,26 @@ def get_rank_at_method_level(mbfl_dataset_dir, bug_id, buggy_line_key, formula):
 
     # 2. DROP THE KEY COLUMN
     mbfl_features_df = mbfl_features_df.drop(columns=['key'])
+    # mbfl_features_df = mbfl_features_df[[
+    #     'target_file', 'function_name', 'line_num',
+    #     'met_1', 'met_2', 'met_3', 'met_4',
+    #     'muse_a', 'muse_b', 'muse_c',
+    #     'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6',
+    #     'bug'
+    # ]]
     mbfl_features_df = mbfl_features_df[[
         'target_file', 'function_name', 'line_num',
-        'met_1', 'met_2', 'met_3', 'met_4',
-        'muse_a', 'muse_b', 'muse_c',
-        'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6',
-        'bug'
+        '# of totfailed_TCs', '# of mutants',
+        'm1:f2p', 'm1:p2f', 'm2:f2p', 'm2:p2f', 'm3:f2p', 'm3:p2f',
+        'm4:f2p', 'm4:p2f', 'm5:f2p', 'm5:p2f', 'm6:f2p', 'm6:p2f',
+        'm7:f2p', 'm7:p2f', 'm8:f2p', 'm8:p2f', 'm9:f2p', 'm9:p2f',
+        'm10:f2p', 'm10:p2f', 'm11:f2p', 'm11:p2f', 'm12:f2p', 'm12:p2f',
+        '|mut(s)|', 'total_f2p', 'total_p2f', 'line_total_f2p', 'line_total_p2f',
+        'muse_1', 'muse_2', 'muse_3', 'muse_4',
+        'muse susp. score', 'met susp. score', 'bug'
+
     ]]
+
 
 
     # 3. GROUP ROWS BY THE SAME FUNCTION NAME AND
@@ -326,10 +341,10 @@ def get_rank_at_method_level(mbfl_dataset_dir, bug_id, buggy_line_key, formula):
     # print(formula, best_rank, best_score, bug_rank, bug_score)
     data = {
         f'total # of functions': total_num_of_func,
-        f'# of functions with same highest {formula} score': best_rank,
-        f'{formula} score of highest rank': best_score,
-        f'rank of buggy function ({formula}, functino level)': bug_rank,
-        f'{formula} score of buggy function': bug_score
+        f'# of functions with same highest score': best_rank,
+        f'score of highest rank': best_score,
+        f'rank of buggy function (functino level)': bug_rank,
+        f'score of buggy function': bug_score
     }
     return data
 
@@ -373,12 +388,14 @@ def start_program(mbfl_dataset_dir_name):
         assert susp_scores is not None
 
         # get rank
-        formulas = ['met_4', 'muse_6']
+        met_key = 'met susp. score'
+        muse_key = 'muse susp. score'
+        formulas = [met_key, muse_key]
         ranks = {}
         for formula in formulas:
             rank_data = get_rank_at_method_level(mbfl_dataset_dir, bug_id, buggy_line_key, formula)
             ranks[formula] = rank_data
-            # data = {
+            # data shape {
             #     f'total # of functions': total_num_of_func,
             #     f'# of functions with same highest {formula} score': best_rank,
             #     f'{formula} score of highest rank': best_score,
@@ -386,9 +403,10 @@ def start_program(mbfl_dataset_dir_name):
             #     f'{formula} score of buggy function': bug_score
             # }
         
-        assert ranks['met_4']['total # of functions'] == ranks['muse_6']['total # of functions']
-        print(f"\tmet_4 rank: {ranks['met_4']['rank of buggy function (met_4, functino level)']}")
-        print(f"\tmuse_6 rank: {ranks['muse_6']['rank of buggy function (muse_6, functino level)']}")
+        assert ranks[met_key]['total # of functions'] == ranks[muse_key]['total # of functions']
+        bug_rank_key = "rank of buggy function (functino level)"
+        print(f"\tmet rank: {ranks[met_key][bug_rank_key]}")
+        print(f"\tmuse  rank: {ranks[muse_key][bug_rank_key]}")
         
         # append to bug_lists
         bug_lists.append({
@@ -408,16 +426,16 @@ def start_program(mbfl_dataset_dir_name):
             'total p2f (all mutants of bug version)': total_p2f,
             'total f2p (all mutants of bug version)': total_f2p,
 
-            '# of functions': ranks['met_4']['total # of functions'],
-            '# of functions with same highest met_4 score': ranks['met_4']['# of functions with same highest met_4 score'],
-            'met_4 score of highest rank': ranks['met_4']['met_4 score of highest rank'],
-            'rank of buggy function (met_4, function level)': ranks['met_4']['rank of buggy function (met_4, functino level)'],
-            'met_4 score of buggy function': ranks['met_4']['met_4 score of buggy function'],
+            '# of functions': ranks[met_key]['total # of functions'],
+            '# of functions with same highest met_4 score': ranks[met_key]['# of functions with same highest score'],
+            'met_4 score of highest rank': ranks[met_key]['score of highest rank'],
+            'rank of buggy function (met_4, function level)': ranks[met_key]['rank of buggy function (functino level)'],
+            'met_4 score of buggy function': ranks[met_key]['score of buggy function'],
 
-            '# of functions with same highest muse_6 score': ranks['muse_6']['# of functions with same highest muse_6 score'],
-            'muse_6 score of highest rank': ranks['muse_6']['muse_6 score of highest rank'],
-            'rank of buggy function (muse_6, function level)': ranks['muse_6']['rank of buggy function (muse_6, functino level)'],
-            'muse_6 score of buggy function': ranks['muse_6']['muse_6 score of buggy function'],
+            '# of functions with same highest muse_6 score': ranks[muse_key]['# of functions with same highest score'],
+            'muse_6 score of highest rank': ranks[muse_key]['score of highest rank'],
+            'rank of buggy function (muse_6, function level)': ranks[muse_key]['rank of buggy function (functino level)'],
+            'muse_6 score of buggy function': ranks[muse_key]['score of buggy function'],
         })
     
     # write to csv

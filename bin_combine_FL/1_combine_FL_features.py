@@ -70,10 +70,36 @@ def write_fl_features(fl_feature_file, fl_features_per_line):
     with open(fl_feature_file, 'w') as f:
         fieldnames = [
             'key', 'ep', 'ef', 'np', 'nf',
-            'met_1', 'met_2', 'met_3', 'met_4',
-            'muse_a', 'muse_b', 'muse_c',
-            'muse_1', 'muse_2', 'muse_3', 'muse_4', 'muse_5', 'muse_6',
+            '# of totfailed_TCs', '# of mutants',
+            'm1:f2p', 'm1:p2f', 'm2:f2p', 'm2:p2f', 'm3:f2p', 'm3:p2f',
+            'm4:f2p', 'm4:p2f', 'm5:f2p', 'm5:p2f', 'm6:f2p', 'm6:p2f',
+            'm7:f2p', 'm7:p2f', 'm8:f2p', 'm8:p2f', 'm9:f2p', 'm9:p2f',
+            'm10:f2p', 'm10:p2f', 'm11:f2p', 'm11:p2f', 'm12:f2p', 'm12:p2f',
             'bug'
+        ]
+
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for row in fl_features_per_line:
+            filtered_row = {}
+            for key in fieldnames:
+                assert key in row, f"Error: {key} not in row"
+                filtered_row[key] = row[key]
+            
+            writer.writerow(filtered_row)
+
+def write_fl_features_with_susp_scores(fl_feature_file, fl_features_per_line):
+    with open(fl_feature_file, 'w') as f:
+        fieldnames = [
+            'key', 'ep', 'ef', 'np', 'nf',
+            '# of totfailed_TCs', '# of mutants',
+            'm1:f2p', 'm1:p2f', 'm2:f2p', 'm2:p2f', 'm3:f2p', 'm3:p2f',
+            'm4:f2p', 'm4:p2f', 'm5:f2p', 'm5:p2f', 'm6:f2p', 'm6:p2f',
+            'm7:f2p', 'm7:p2f', 'm8:f2p', 'm8:p2f', 'm9:f2p', 'm9:p2f',
+            'm10:f2p', 'm10:p2f', 'm11:f2p', 'm11:p2f', 'm12:f2p', 'm12:p2f',
+            'bug',
+            'muse susp. score', 'metallaxis susp. score'
         ]
 
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -98,6 +124,9 @@ def start_program(sbfl, mbfl, fl):
     fl_feature_dir = fl_path / 'FL_features_per_bug_version'
     fl_feature_dir.mkdir(parents=True, exist_ok=True)
 
+    fl_feature_dir_with_susp_scores = fl_path / 'FL_features_per_bug_version_with_susp_scores'
+    fl_feature_dir_with_susp_scores.mkdir(parents=True, exist_ok=True)
+
     # get the bug versions
     sbfl_bugs = get_bug_versions(sbfl_path)
     mbfl_bugs = get_bug_versions(mbfl_path)
@@ -116,6 +145,9 @@ def start_program(sbfl, mbfl, fl):
         bug_id = sbfl_bug
         fl_feature_file_name = f"{bug_id}.fl_features.csv"
         fl_feature_file = fl_feature_dir / fl_feature_file_name
+        fl_feature_file_with_susp_scores_name = f"{bug_id}.fl_features_with_susp_scores.csv"
+        fl_feature_file_with_susp_scores_file = fl_feature_dir_with_susp_scores / fl_feature_file_with_susp_scores_name
+
         cnt += 1
         print(f"{cnt}: processing {bug_id}")
 
@@ -155,20 +187,35 @@ def start_program(sbfl, mbfl, fl):
                 'ef': sbfl_row['ef'],
                 'np': sbfl_row['np'],
                 'nf': sbfl_row['nf'],
-                'met_1': mbfl_row['met_1'],
-                'met_2': mbfl_row['met_2'],
-                'met_3': mbfl_row['met_3'],
-                'met_4': mbfl_row['met_4'],
-                'muse_a': mbfl_row['muse_a'],
-                'muse_b': mbfl_row['muse_b'],
-                'muse_c': mbfl_row['muse_c'],
-                'muse_1': mbfl_row['muse_1'],
-                'muse_2': mbfl_row['muse_2'],
-                'muse_3': mbfl_row['muse_3'],
-                'muse_4': mbfl_row['muse_4'],
-                'muse_5': mbfl_row['muse_5'],
-                'muse_6': mbfl_row['muse_6'],
-                'bug': sbfl_bug_status
+                '# of totfailed_TCs': mbfl_row['# of totfailed_TCs'],
+                '# of mutants': mbfl_row['# of mutants'],
+                'm1:f2p': mbfl_row['m1:f2p'],
+                'm1:p2f': mbfl_row['m1:p2f'],
+                'm2:f2p': mbfl_row['m2:f2p'],
+                'm2:p2f': mbfl_row['m2:p2f'],
+                'm3:f2p': mbfl_row['m3:f2p'],
+                'm3:p2f': mbfl_row['m3:p2f'],
+                'm4:f2p': mbfl_row['m4:f2p'],
+                'm4:p2f': mbfl_row['m4:p2f'],
+                'm5:f2p': mbfl_row['m5:f2p'],
+                'm5:p2f': mbfl_row['m5:p2f'],
+                'm6:f2p': mbfl_row['m6:f2p'],
+                'm6:p2f': mbfl_row['m6:p2f'],
+                'm7:f2p': mbfl_row['m7:f2p'],
+                'm7:p2f': mbfl_row['m7:p2f'],
+                'm8:f2p': mbfl_row['m8:f2p'],
+                'm8:p2f': mbfl_row['m8:p2f'],
+                'm9:f2p': mbfl_row['m9:f2p'],
+                'm9:p2f': mbfl_row['m9:p2f'],
+                'm10:f2p': mbfl_row['m10:f2p'],
+                'm10:p2f': mbfl_row['m10:p2f'],
+                'm11:f2p': mbfl_row['m11:f2p'],
+                'm11:p2f': mbfl_row['m11:p2f'],
+                'm12:f2p': mbfl_row['m12:f2p'],
+                'm12:p2f': mbfl_row['m12:p2f'],
+                'bug': sbfl_bug_status,
+                'muse susp. score': mbfl_row['muse susp. score'],
+                'metallaxis susp. score': mbfl_row['met susp. score'],
             }
 
             # 5. append the row to the list
@@ -176,6 +223,7 @@ def start_program(sbfl, mbfl, fl):
         
         # 6. write the features to a csv file
         write_fl_features(fl_feature_file, fl_features_per_line)
+        write_fl_features_with_susp_scores(fl_feature_file_with_susp_scores_file, fl_features_per_line)
 
 
         # break
